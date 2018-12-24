@@ -1,6 +1,6 @@
 """
 Tests based on the DataFrames package files as of 2018-12-23, which do not use
-`Pkg` as of that date.
+`Pkg` 1.0+ as of that date.
 """
 
 using Test
@@ -16,10 +16,11 @@ Pkg.activate("./newpkg")
 
     @test isfile("./newpkg/Project.toml")
     @test isfile("./newpkg/Manifest.toml")
+    @test !isfile("./newpkg/REQUIRE")
     
     # Can't pass anything other than a String as pkgdir
     @test_throws MethodError migrate(1)
-    @test_throws MethodError migrate(["abc", "123"]) 
+    @test_throws MethodError migrate(["abc", "123"])
 end
 
 @testset "givename" begin

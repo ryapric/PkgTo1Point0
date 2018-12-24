@@ -8,11 +8,12 @@ This includes:
 
 - Replacing `REQUIRE` files with appropriate `Project/Manifest.toml` files.
 
-- 
+- Adding `name` and `uuid` fields to `Project.toml`
 
 # Examples
 
-```jldoctest using PkgTo1Point0
+```jldoctest
+using PkgTo1Point0
 
 migrate("/path/to/PkgDir")
 
@@ -25,9 +26,10 @@ function migrate(pkgdir::AbstractString = "."; suppress::Bool = false)
     VERSION >= v"1.0.0" || error("You should be updating Julia packages to v1.0+, *using* v1.0+, you hypocrite")
 
     oldpwd = pwd()
+
     cd(pkgdir)
     replaceREQUIRE("./REQUIRE")
-    givename("./Project.toml")
+    givename("./Project.toml", name = replace(dirname(pkgdir), ".jl" => ""), uuid = "123")
 
     cd(oldpwd)
     suppress || printstyled("\tSuccessfully migrated package structure at $pkgdir to use Pkg v1.0+\n",
@@ -42,13 +44,11 @@ function replaceREQUIRE(file::String = "./REQUIRE")
         push!(deps, i[1])
     end
     
-    # Remove strict julia dependency
+    # Remove strict julia dependency that appears in `REQUIRE`
     deps = filter(x -> !occursin(r"^julia", x), deps)
 
     # Add each dependency, which generates the .toml files
-    for i in deps
-        Pkg.add(deps)
-    end
+    Pkg.add(deps)
 
     # Remove REQUIRE
     rm(file)
@@ -59,7 +59,7 @@ function givename(file::String = "./Project.toml"; name::String, uuid::String)
 
     # Check for existing data in Project.toml
     hasname = any(occursin.("name = ", projfile)) | any(occursin.("uuid = ", projfile))
-    if hasname return 0 end
+    if hasname return nothing end
 
     depsblock = projfile
     headerblock = ["name = \"$name\"", "uuid = \"$uuid\"", ""]
