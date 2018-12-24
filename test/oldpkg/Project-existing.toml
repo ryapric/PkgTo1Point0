@@ -1,0 +1,4 @@
+name = "TotallyNotDataFrames"
+uuid = "f20789d2-06ef-11e9-2d12-d5148529f456"
+authors = ["Ryan Price <ryapric@gmail.com>"]
+version = "0.1.0"
